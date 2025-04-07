@@ -17,8 +17,8 @@ pub struct PackageInfo {
     /// The current delivery status of the package
     pub delivery_status: DeliveryStatus,
 
-    /// The shipping provider for the shipment (FedEx, DHL, UPS, etc.)
-    pub shipping_provider: String,
+    /// The carrier/shipping provider for the shipment (FedEx, DHL, UPS, etc.)
+    pub carrier: String,
 
     /// The most recent timestamp of the package for when the status was updated
     pub timestamp: DateTime<Local>,

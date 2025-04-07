@@ -25,3 +25,8 @@ pub enum DeliveryStatus {
     Delivered,
     Cancelled,
 }
+
+pub enum Carrier {
+    FedEx,
+    Other(String),
+}
