@@ -1,4 +1,3 @@
-use std::io::Read;
 use reqwest::header::{HeaderMap, HeaderValue};
 
 fn construct_headers() -> HeaderMap {
