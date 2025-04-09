@@ -1,14 +1,14 @@
-use api::{db, services::{dhl, fedex}};
+use api::services::fedex;
 
 #[tokio::main]
 async fn main() -> sqlx::Result<()> {
-    let _db = db::connect()
+    /* let _db = db::connect()
         .await
-        .expect("could not connect to database!");
+        .expect("could not connect to database!"); */
 
-    dhl::get_tracking_info()
+    fedex::track_multiple_piece_shipment()
         .await
-        .expect("could not get tracking info!");
+        .expect("could not track shipment!");
     
     Ok(())
 }

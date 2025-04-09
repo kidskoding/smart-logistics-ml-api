@@ -1,30 +1,70 @@
+extern crate reqwest;
+use dotenv::dotenv;
 use reqwest::header::{HeaderMap, HeaderValue};
 
-fn construct_headers() -> HeaderMap {
+async fn construct_headers() -> HeaderMap {
     let mut headers = HeaderMap::new();
     headers.insert("Content-Type", HeaderValue::from_static("application/json"));
     headers.insert("X-locale", HeaderValue::from_static("en_US"));
-    headers.insert("Authorization", HeaderValue::from_static("Bearer "));
+    headers.insert("Authorization", HeaderValue::from_str(
+        &format!("Bearer {}", get_fedex_token().await.unwrap())
+    ).unwrap());
+    
     headers
 }
 
-pub async fn run() -> reqwest::Result<()> {
-    let client = reqwest::Client::new();
-    let input = r#"{
-        "tcnInfo": {
-        "value": "N552428361Y555XXX",
-        "carrierCode": "FDXE",
-        "shipDateBegin": "2019-02-13",
-        "shipDateEnd": "2019-02-13"
-        },
-        "includeDetailedScans": true
-    }"#;
+pub async fn get_fedex_token() -> reqwest::Result<String> {
+    dotenv().ok();
 
-    let res = client.post("https://apis-sandbox.fedex.com/track/v1/tcn")
+    let client_id = std::env::var("FEDEX_API_KEY")
+        .expect("FEDEX_API_KEY not set");
+    let client_secret = std::env::var("FEDEX_SECRET_API_KEY")
+        .expect("FEDEX_SECRET_API_KEY not set");
+
+    let input = format!(
+        "grant_type=client_credentials&client_id={}&client_secret={}", 
+        client_id, 
+        client_secret
+    );
+
+    let client = reqwest::Client::new(); 
+    let res = client
+        .post("https://apis-sandbox.fedex.com/oauth/token")
+        .header("Content-Type", "application/x-www-form-urlencoded")
         .body(input)
-        .headers(construct_headers())
         .send()
         .await?;
+
+    let json: serde_json::Value = res.json().await?;
+    let access_token: String = json["access_token"].as_str()
+        .expect("Failed to get access token")
+        .to_string();
+
+    Ok(access_token)
+}
+
+pub async fn track_multiple_piece_shipment() -> reqwest::Result<()> {
+    let input = r#"{
+        "includeDetailedScans": true,
+        "associatedType": "STANDARD_MPS",
+        "masterTrackingNumberInfo": {
+            "shipDateEnd": "2018-11-03",
+            "shipDateBegin": "2018-11-01",
+            "trackingNumberInfo": {}
+        },
+        "pagingDetails": {
+            "resultsPerPage": 56,
+            "pagingToken": "38903279038"
+        }
+    }"#;
+
+    let client = reqwest::Client::new();
+    let res = 
+        client.post("https://apis-sandbox.fedex.com/track/v1/associatedshipments")
+            .body(input.to_string())
+            .headers(construct_headers().await)
+            .send()
+            .await?;
 
     let status = res.status();
     let headers = res.headers().clone();
