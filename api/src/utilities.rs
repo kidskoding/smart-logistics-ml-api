@@ -1,3 +1,4 @@
+extern crate reqwest;
 pub enum TrafficCondition {
     Low,
     Moderate,
