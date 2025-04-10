@@ -6,19 +6,25 @@ async fn main() -> sqlx::Result<()> {
         .await
         .expect("could not connect to database!"); */
 
-    fedex::track_shipment(r#"
+    let api_call = fedex::track_shipment(r#"
         {
-            "tcnInfo": {
-                "value": "N552428361Y555XXX",
-                "carrierCode": "FDXE",
-                "shipDateBegin": "2025-04-07",
-                "shipDateEnd": "2025-04-09"
-            },
-            "includeDetailedScans": true
-        }"#
-    , "https://apis-sandbox.fedex.com/track/v1/tcn")
-        .await
-        .expect("could not track shipment!");
+            "includeDetailedScans": true,
+            "trackingInfo": [
+                {
+                    "shipDateBegin": "2020-03-29",
+                    "shipDateEnd": "2020-04-01",
+                    "trackingNumberInfo": {
+                        "trackingNumber": "128667043726",
+                        "carrierCode": "FDXE",
+                        "trackingNumberUniqueId": "245822~123456789012~FDEG"
+                    }
+                }
+            ]
+        }"#, 
+        "https://apis-sandbox.fedex.com/track/v1/trackingnumbers"
+    ).await.expect("could not track shipment!");
+    println!("Status: {}", api_call.0);
+    println!("Body: \n{}", api_call.1);
     
     Ok(())
 }

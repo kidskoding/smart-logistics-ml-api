@@ -1,13 +1,13 @@
 use std::env;
 use dotenv::dotenv;
-use reqwest::header::{HeaderMap, HeaderValue};
+use reqwest::{header::{HeaderMap, HeaderValue}, StatusCode};
 
 pub async fn get_token() -> reqwest::Result<String> {
     dotenv().ok();
 
-    let client_id = std::env::var("FEDEX_API_KEY")
+    let client_id = env::var("FEDEX_API_KEY")
         .expect("FEDEX_API_KEY not set");
-    let client_secret = std::env::var("FEDEX_SECRET_API_KEY")
+    let client_secret = env::var("FEDEX_SECRET_API_KEY")
         .expect("FEDEX_SECRET_API_KEY not set");
 
     let input = format!(
@@ -44,7 +44,10 @@ async fn construct_headers() -> HeaderMap {
     headers
 }
 
-pub async fn track_shipment(json_input: &str, endpoint: &str) -> reqwest::Result<()> {
+pub async fn track_shipment(
+    json_input: &str, 
+    endpoint: &str
+) -> reqwest::Result<(StatusCode, String)> {  
     let client = reqwest::Client::new();
     
     let res = client.post(endpoint)
@@ -54,13 +57,17 @@ pub async fn track_shipment(json_input: &str, endpoint: &str) -> reqwest::Result
         .await?;
         
     let status = res.status();
-    let headers = res.headers().clone();
-    
     let body = res.text().await?;
-    
-    println!("Status: {}", status);
-    println!("Headers:\n{:#?}", headers);
-    println!("Body:\n{}", body);
+    let json_value: Result<serde_json::Value, serde_json::Error> = serde_json::from_str(&body);
 
-    Ok(())
+    match json_value {
+        Ok(value) => {
+            let pretty_body = serde_json::to_string_pretty(&value).unwrap();
+            Ok((status, pretty_body))
+        },
+        Err(_) => {
+            eprintln!("could not pretty format json response. outputting raw response");
+            Ok((status, body))
+        }
+    }
 }
