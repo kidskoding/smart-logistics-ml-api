@@ -3,3 +3,7 @@ ipykernel
 torch
 torchvision
 torchaudio
+pandas
+sqlalchemy
+dotenv
+wheel
