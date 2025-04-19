@@ -1,4 +1,4 @@
-use api::{db, services::fedex, tracking_info::TrackingInfo};
+use api::{db, services::fedex};
 
 #[tokio::main]
 async fn main() -> sqlx::Result<()> {

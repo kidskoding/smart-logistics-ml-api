@@ -33,7 +33,8 @@ impl Display for TrackingInfo {
         if !self.timestamps.is_empty() {
             writeln!(f, "   - Tracking History:")?;
             for (date, event) in &self.timestamps {
-                writeln!(f, "       - {} - {}", date, event)?;
+                let (start, end) = event.split_once('T').unwrap_or((date, ""));
+                writeln!(f, "       - {} - {} @ {}", date, start, end)?;
             }
         }
         
