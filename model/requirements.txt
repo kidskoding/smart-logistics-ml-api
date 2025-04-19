@@ -9,3 +9,4 @@ dotenv
 wheel
 psycopg2-binary
 setuptools
+matplotlib
