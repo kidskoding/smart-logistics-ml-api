@@ -2,7 +2,7 @@ use tracking::services::fedex;
 
 #[tokio::main]
 async fn main() -> sqlx::Result<()> {
-    let _db = db::connection::connect().await.expect("could not connect to database!");
+    let db = db::connection::connect().await.expect("could not connect to database!");
 
     let api_call = fedex::track_shipment(r#"
         {
@@ -25,6 +25,10 @@ async fn main() -> sqlx::Result<()> {
     let tracking_info = fedex::parse_fedex_response(&api_call.1)
         .expect("could not parse fedex response!");
     print!("{}", tracking_info);
+
+    db::schema::insert_tracking_info(&db, &tracking_info)
+        .await
+        .expect("could not insert tracking info into database!");
 
     Ok(())
 }

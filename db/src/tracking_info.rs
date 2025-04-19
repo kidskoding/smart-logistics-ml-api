@@ -4,13 +4,13 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Deserialize, Serialize, Debug)]
 pub struct TrackingInfo {
-    pub tracking_id: String,
+    pub tracking_id: i64,
     pub carrier: String,
     pub delivery_date: String,
     pub status: String,
     pub location: (String, String),
     pub timestamps: Vec<(String, String)>,
-    pub dimensions: [u64; 3],
+    pub dimensions: [i64; 3],
     pub weight: f64,
 }
 

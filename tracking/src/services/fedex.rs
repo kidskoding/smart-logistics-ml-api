@@ -1,9 +1,9 @@
 use std::env;
 use chrono::DateTime;
+use db::tracking_info::TrackingInfo;
 use dotenv::dotenv;
 use reqwest::{header::{HeaderMap, HeaderValue}, StatusCode};
 use serde_json::Value;
-use crate::tracking_info::TrackingInfo;
 
 pub async fn get_token() -> reqwest::Result<String> {
     dotenv().ok();
@@ -79,8 +79,9 @@ pub fn parse_fedex_response(response_json: &str) -> serde_json::Result<TrackingI
     let tracking_info = TrackingInfo {
         tracking_id: track_results["trackingNumberInfo"]["trackingNumber"]
             .as_str()
-            .unwrap_or("")
-            .to_string(),
+            .expect("missing tracking number!")
+            .parse::<i64>()
+            .expect("failed to parse tracking number as i64"),
 
         carrier: track_results["trackingNumberInfo"]["carrierCode"]
             .as_str()
@@ -138,9 +139,9 @@ pub fn parse_fedex_response(response_json: &str) -> serde_json::Result<TrackingI
         dimensions: {
             let dimensions_data = &track_results["packageDetails"]["weightAndDimensions"]["dimensions"][0];
             [
-                dimensions_data["length"].as_u64().unwrap_or(0),
-                dimensions_data["width"].as_u64().unwrap_or(0),
-                dimensions_data["height"].as_u64().unwrap_or(0),
+                dimensions_data["length"].as_i64().unwrap_or(0),
+                dimensions_data["width"].as_i64().unwrap_or(0),
+                dimensions_data["height"].as_i64().unwrap_or(0),
             ]
         },
 
