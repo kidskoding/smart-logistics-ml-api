@@ -1,10 +1,10 @@
-use api::services::fedex;
+use api::{db, services::fedex, tracking_info::TrackingInfo};
 
 #[tokio::main]
 async fn main() -> sqlx::Result<()> {
-    /* let _db = db::connect()
+    let _db = db::connect()
         .await
-        .expect("could not connect to database!"); */
+        .expect("could not connect to database!");
 
     let api_call = fedex::track_shipment(r#"
         {
@@ -23,8 +23,10 @@ async fn main() -> sqlx::Result<()> {
         }"#, 
         "https://apis-sandbox.fedex.com/track/v1/trackingnumbers"
     ).await.expect("could not track shipment!");
-    println!("Status: {}", api_call.0);
-    println!("Body: \n{}", api_call.1);
-    
+
+    let tracking_info = fedex::parse_fedex_response(&api_call.1)
+        .expect("could not parse fedex response!");
+    print!("{}", tracking_info);
+
     Ok(())
 }
