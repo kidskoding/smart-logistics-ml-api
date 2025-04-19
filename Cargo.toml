@@ -1,0 +1,8 @@
+[workspace]
+members = [
+    "db",
+    "tracking",
+]
+
+[workspace.dependencies]
+db = { version = "0.1", path = "db" }

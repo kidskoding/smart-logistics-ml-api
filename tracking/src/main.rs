@@ -1,10 +1,8 @@
-use api::{db, services::fedex};
+use tracking::services::fedex;
 
 #[tokio::main]
 async fn main() -> sqlx::Result<()> {
-    let _db = db::connect()
-        .await
-        .expect("could not connect to database!");
+    let _db = db::connection::connect().await.expect("could not connect to database!");
 
     let api_call = fedex::track_shipment(r#"
         {
