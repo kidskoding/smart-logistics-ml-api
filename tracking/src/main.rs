@@ -29,6 +29,9 @@ async fn main() -> sqlx::Result<()> {
     db::schema::insert_tracking_info(&db, &tracking_info)
         .await
         .expect("could not insert tracking info into database!");
+    db::schema::insert_timestamps(&db, &tracking_info)
+        .await
+        .expect("could not insert timestamps into database!");
 
     Ok(())
 }

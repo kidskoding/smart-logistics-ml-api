@@ -22,3 +22,22 @@ pub async fn insert_tracking_info(pool: &PgPool, tracking_info: &TrackingInfo) -
     
     Ok(())
 }
+
+pub async fn insert_timestamps(pool: &PgPool, tracking_info: &TrackingInfo) -> sqlx::Result<()> {
+    for (event, datetime) in &tracking_info.timestamps {
+        let (date, time) = datetime.split_once('T').unwrap_or((datetime, ""));
+        sqlx::query(
+            r#"
+                INSERT INTO timestamps (tracking_info_id, event, date, time)
+                VALUES ($1, $2, $3, $4)
+            "#)
+            .bind(&tracking_info.tracking_id)
+            .bind(event)
+            .bind(date)
+            .bind(time)
+            .execute(pool)
+            .await?;
+    }
+    
+    Ok(())
+}
