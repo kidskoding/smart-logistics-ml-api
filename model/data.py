@@ -5,9 +5,9 @@ import os
 
 load_dotenv()
 
-db_url = os.getenv("DATABASE_URL")
+db_url = os.getenv("DATABASE_URL_SQLALCHEMY")
 if db_url is None:
-    raise ValueError("DATABASE_URL not found in .env file")
+    raise ValueError("DATABASE_URL_SQLALCHEMY not found in .env file")
 
 engine = create_engine(db_url)
 
