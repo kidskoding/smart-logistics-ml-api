@@ -93,7 +93,7 @@ pub fn parse_fedex_response(response_json: &str) -> serde_json::Result<TrackingI
                 .as_array()
                 .and_then(|dates| {
                     dates.iter().find(|date| {
-                        date["type"].as_str().unwrap_or("") == "ACTUAL_DELIVERY"
+                        date["type"].as_str().unwrap_or("") == "ACTUAL_PICKUP"
                     })
                 })
                 .and_then(|date| date["dateTime"].as_str())
@@ -118,11 +118,16 @@ pub fn parse_fedex_response(response_json: &str) -> serde_json::Result<TrackingI
                 .expect("missing city")
                 .to_string();
             let state = location_data["stateOrProvinceCode"]
-                .as_str()
-                .expect("missing state")
-                .to_string();
+                .as_str();
+            let mut val = String::new();
 
-            (city, state)
+            if let Some(st) = state {
+                val = st.to_string();
+            } else if let Some(country) = location_data["countryName"].as_str() {
+                val = country.to_string()
+            }
+
+            (city, val)
         },
 
         timestamps: track_results["scanEvents"]
